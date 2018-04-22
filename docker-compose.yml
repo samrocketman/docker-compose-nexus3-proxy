@@ -4,6 +4,9 @@ networks:
   internal:
     driver: bridge
 
+volumes:
+  nexus-data:
+
 services:
   nexus3:
     image: 'sonatype/nexus3'
@@ -18,3 +21,5 @@ services:
       - 8081/tcp
     networks:
       - internal
+    volumes:
+      - 'nexus-data:/nexus-data'
