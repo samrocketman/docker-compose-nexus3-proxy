@@ -41,7 +41,10 @@ parser.add_argument('-c', '--ca-file', default=os.getenv('NEXUS_CA_FILE'), metav
 parser.add_argument('-f', '--function', action="append", default=[], metavar='groovy-script', dest='groovy_files', help='A groovy script to be uploaded as a Nexus function.  The file name (minus the extension) will be the name of the REST function in Nexus.')
 parser.add_argument('-n', '--nexus', default=os.getenv('NEXUS_ENDPOINT', 'http://localhost:8081'), metavar='NEXUS_ENDPOINT', dest='nexus_endpoint', help='URL to the Nexus endpoint.')
 parser.add_argument('-p', '--proxy', default=os.getenv('NEXUS_SOCKS_PROXY'), metavar='proxy', dest='socks_proxy', help='Define a SOCKS5 proxy to proxy traffic.  It can also be set via NEXUS_SOCKS_PROXY environment variable.')
-parser.add_argument('-d', '--delete', action='store_true', dest='delete', help='Delete scripts instead of uploading them.')
+parser.add_argument('-r', '--run', action='store_true', dest='run', help='Run function after uploading it.')
+parser.add_argument('-d', '--data', default='', metavar='data-file', dest='data', help='Data file whose contents get submitted to the function being run.  Depends on --run.  If more than one function is specified for upload, then this option is ignored.')
+parser.add_argument('--delete', action='store_true', dest='delete', help='Delete scripts instead of uploading them.')
+parser.add_argument('-s', '--skip-upload', action='store_true', dest='skip', help='Skip uploading the function to Nexus (and proceed to only run or delete).')
 parser.add_argument('-v', '--verbosity', action="count", dest='verbosity', help="Increase output verbosity.")
 
 if len(additional_args) > 0:
@@ -133,6 +136,8 @@ import urllib2
 # END CONFIGURE SOCKS5 PROXY
 #
 def getUrl(url, headers, data=None, method='GET'):
+    if args.verbosity >= 5:
+        printErr("Headers: %s" % headers)
     if args.verbosity >= 3:
         printErr('%s %s' % (method, url))
     if args.verbosity >= 4:
@@ -199,19 +204,38 @@ def getListOfExistingScripts():
     return map(lambda x: x['name'], json.loads(callNexusUrl(url)))
 
 #
-# ADD, UPDATE, OR DELETE REST FUNCTIONS
+# ADD OR UPDATE REST FUNCTIONS
 #
-nexus_scripts = getListOfExistingScripts()
 headers['Content-Type'] = 'application/json'
-for script in args.groovy_files:
-    url = "%s/%s" % (args.nexus_endpoint, 'service/rest/v1/script')
-    method = 'POST'
-    if getScriptName(script) in nexus_scripts:
-        method = 'PUT'
-        url += "/%s" % getScriptName(script)
-    if args.delete:
-        headers.pop('Content-Type', None)
+if not args.skip:
+    nexus_scripts = getListOfExistingScripts()
+    for script in args.groovy_files:
+        url = "%s/%s" % (args.nexus_endpoint, 'service/rest/v1/script')
+        method = 'POST'
+        if getScriptName(script) in nexus_scripts:
+            method = 'PUT'
+            url += "/%s" % getScriptName(script)
+        callNexusUrl(url, headers, getJsonPayload(script), method)
+
+#
+# RUN REST FUNCTIONS
+#
+if args.run:
+    headers['Content-Type'] = 'text/plain'
+    data = None
+    if len(args.groovy_files) == 1 and len(args.data) > 0:
+        with open(args.data, 'r') as f:
+            data = f.read()
+    for script in args.groovy_files:
+        url = "%s/%s/%s/run" % (args.nexus_endpoint, 'service/rest/v1/script', getScriptName(script))
+        print callNexusUrl(url, headers, data, 'POST')
+
+#
+# DELETE REST FUNCTIONS
+#
+if args.delete:
+    nexus_scripts = getListOfExistingScripts()
+    headers.pop('Content-Type', None)
+    for script in args.groovy_files:
         if getScriptName(script) in nexus_scripts:
             callNexusUrl(url, headers, None, 'DELETE')
-    else:
-        callNexusUrl(url, headers, getJsonPayload(script), method)
