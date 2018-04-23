@@ -21,6 +21,9 @@ if [ $# -eq 0 ]; then
   exit 1
 fi
 
-curl -u "${NEXUS_USER}:${NEXUS_PASSWORD}" -X POST -d @"$1" \
+FILE="$1"
+shift
+
+curl "$@" -u "${NEXUS_USER}:${NEXUS_PASSWORD}" -X POST -d @"${FILE}" \
   --header 'Content-Type: text/plain' \
   "${NEXUS_ENDPOINT}"/service/rest/v1/script/nexusConfiguration/run
