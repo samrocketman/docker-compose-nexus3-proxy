@@ -43,6 +43,7 @@ class MyException extends Exception {
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import org.sonatype.nexus.repository.config.Configuration
 
 blobStoreManager = blobStore.blobStoreManager
 repositoryManager = repository.repositoryManager
@@ -86,7 +87,7 @@ void validateConfiguration(def json) {
     List<String> supported_root_keys = ['repositories', 'blobstores']
     List<String> supported_blobstores = ['file']
     List<String> supported_repository_providers = ['bower', 'docker', 'gitlfs', 'maven2', 'npm', 'nuget', 'pypi', 'raw', 'rubygems']
-    List<String> supported_repository_types = ['proxied', 'hosted', 'group']
+    List<String> supported_repository_types = ['proxy', 'hosted', 'group']
     String valid_name = '^[-a-zA-Z]+$'
     if(!(json in Map)) {
         throw new MyException("Configuration is not valid.  It must be a JSON object.  Instead, found a JSON array.")
@@ -101,6 +102,49 @@ void validateConfiguration(def json) {
     checkForEmptyValidation('blobstores defined in repositories.  The following must be listed in the blobstores',
             (getKnownDesiredBlobStores(json) - json['blobstores']['file']))
     checkForUniqueRepositories(json)
+}
+
+void createRepository(String provider, String type, String name, Map json) {
+    if(!repositoryManager.get(name)) {
+        Configuration repo_config = new Configuration()
+        repo_config.repositoryName = name
+        repo_config.recipeName = "${provider}-${type}".toString()
+        repo_config.online = Boolean.parseBoolean(json.get('online', 'false'))
+        def storage = repo_config.attributes('storage')
+        storage.set('blobStoreName', json['blobstore']['name'])
+        storage.set('strictContentTypeValidation', Boolean.parseBoolean(json['blobstore'].get('strict_content_type_validation', 'false')))
+        if(type == 'hosted') {
+            //can be allow_write_once, allow_write, or read_only
+            storage.set('writePolicy', json.get('write_policy', 'allow_write_once'))
+        }
+        else if(type == 'proxy') {
+            def proxy = repo_config.attributes('proxy')
+            proxy.set('remoteUrl', json['remote']['url'])
+            String auth_type = json['remote'].get('auth_type', 'none')
+            switch(auth_type) {
+                case 'none':
+                    repo_config.getAttributes().remove('httpclient')
+                    break
+                case ['username', 'ntml']:
+                    def authentication = repo_config.attributes('httpclient').child('authentication')
+                    authentication.set('type', auth_type);
+                    authentication.set('username', json['remote'].get('user', ''))
+                    authentication.set('password', json['remote'].get('password', ''))
+                    authentication.set('ntlmHost', json['remote'].get('ntlm_host', ''))
+                    authentication.set('ntlmDomain', json['remote'].get('ntlm_domain', ''))
+                    break
+                default:
+                    repo_config.getAttributes().remove('httpclient')
+                    break
+            }
+            if(provider == 'maven2') {
+                def maven = repo_config.attributes('maven')
+                maven.set('versionPolicy', json['remote'].get('version_policy', 'release').toUpperCase())
+                maven.set('layoutPolicy', json['remote'].get('layout_policy', 'permissive').toUpperCase())
+            }
+            repositoryManager.create(repo_config)
+        }
+    }
 }
 
 try {
@@ -120,6 +164,15 @@ config['blobstores']['file'].each { String store ->
 }
 
 //create non-group repositories second
+config['repositories'].each { provider, provider_value ->
+    provider_value.findAll { k, v ->
+        k != 'group'
+    }.each { type, type_value ->
+        type_value.each { name, name_value ->
+            createRepository(provider, type, name, name_value)
+        }
+    }
+}
 
 //create repository groups last
 

@@ -1,7 +1,7 @@
 {
   "repositories": {
       "maven2": {
-          "proxied": {
+          "proxy": {
               "repo-jenkins-ci-org": {
                   "name": "Proxied repo.jenkins-ci.org",
                   "online": "true",
@@ -14,7 +14,7 @@
                       "strict_content_type_validation": "true"
                   },
                   "version_policy": "release",
-                  "layout_policy": "strict"
+                  "layout_policy": "permissive"
               },
               "maven-central": {
                   "name": "Proxied maven central",
