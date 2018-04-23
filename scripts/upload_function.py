@@ -9,6 +9,7 @@
 
 # DESCRIPTION:
 #     Upload script to Nexus 3 scripting endpoint.
+#     Delete script from Nexus 3 scripting endpoint.
 
 from httplib import HTTPSConnection
 import argparse
@@ -75,7 +76,6 @@ if 'headers' in settings:
 else:
     headers = {
         'Accept': '*/*',
-        #'Connection': 'close',
         'Host': args.nexus_endpoint.split('/')[2],
     }
 #always set the User-Agent
