@@ -16,6 +16,11 @@ NEXUS_ENDPOINT="${NEXUS_ENDPOINT%/}"
 NEXUS_USER="${NEXUS_USER:-admin}"
 NEXUS_PASSWORD="${NEXUS_PASSWORD:-admin123}"
 
+if [ $# -eq 0 ]; then
+  echo 'ERROR: first argument must be repository JSON configuration.' >&2
+  exit 1
+fi
+
 curl -u "${NEXUS_USER}:${NEXUS_PASSWORD}" -X POST -d @"$1" \
   --header 'Content-Type: text/plain' \
   "${NEXUS_ENDPOINT}"/service/rest/v1/script/nexusConfiguration/run
