@@ -235,8 +235,10 @@ if args.run:
 # DELETE REST FUNCTIONS
 #
 if args.delete:
+    headers['Content-Type'] = 'application/json'
     nexus_scripts = getListOfExistingScripts()
     headers.pop('Content-Type', None)
     for script in args.groovy_files:
         if getScriptName(script) in nexus_scripts:
+            url = "%s/%s/%s" % (args.nexus_endpoint, 'service/rest/v1/script', getScriptName(script))
             callNexusUrl(url, headers, None, 'DELETE')
