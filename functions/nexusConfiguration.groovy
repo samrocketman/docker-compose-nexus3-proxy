@@ -53,6 +53,19 @@ void checkForEmptyValidation(String message, List<String> bad_values) {
     }
 }
 
+List<String> getKnownDesiredBlobStores(Map json) {
+    json['repositories'].collect { provider_key, provider ->
+        provider.collect { repo_type_key, repo_type ->
+            repo_type.collect { repo_name_key, repo_name ->
+                if(!repo_name['blobstore']?.get('name')) {
+                    throw new MyException("Blobstore configuration required: ${[provider_key, repo_type_key, repo_name_key].join(' -> ')}")
+                }
+                repo_name['blobstore']?.get('name')
+            }
+        }
+    }.flatten().sort().unique()
+}
+
 void validateConfiguration(def json) {
     List<String> supported_root_keys = ['repositories', 'blobstores']
     List<String> supported_blobstores = ['file']
@@ -69,6 +82,10 @@ void validateConfiguration(def json) {
     }
     checkForEmptyValidation('repository providers', ((json['repositories']?.keySet() as List) - supported_repository_providers))
     checkForEmptyValidation('repository types', (json['repositories'].collect { k, v -> v.keySet() as List }.flatten().sort().unique() - supported_repository_types))
+    checkForEmptyValidation('blobstores defined in repositories.  The following must be listed in the blobstores',
+            (getKnownDesiredBlobStores(json) - json['blobstores']['file']))
+    /*
+    */
 }
 
 try {
@@ -87,4 +104,4 @@ validateConfiguration(config)
 //create repository groups last
 
 //.metaClass.methods*.name.sort().unique().join(' ')
-//'success'
+'success'
