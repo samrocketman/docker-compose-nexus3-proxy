@@ -84,8 +84,6 @@ void validateConfiguration(def json) {
     checkForEmptyValidation('repository types', (json['repositories'].collect { k, v -> v.keySet() as List }.flatten().sort().unique() - supported_repository_types))
     checkForEmptyValidation('blobstores defined in repositories.  The following must be listed in the blobstores',
             (getKnownDesiredBlobStores(json) - json['blobstores']['file']))
-    /*
-    */
 }
 
 try {
@@ -98,6 +96,11 @@ validateConfiguration(config)
 //we've come this far so it is probably good?
 
 //create blob stores first
+config['blobstores']['file'].each { String store ->
+    if(!blobStoreManager.get(store)) {
+        blobStore.createFileBlobStore(store, store)
+    }
+}
 
 //create non-group repositories second
 
