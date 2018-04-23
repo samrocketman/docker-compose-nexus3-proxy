@@ -167,6 +167,7 @@ def getUrl(url, headers, data=None, method='GET'):
         urlconn.close()
     except urllib2.HTTPError as e:
         responseCode = e.code
+        responseString = e.read()
         responseErrorReason = e.reason
     return (responseCode, responseString, responseErrorReason)
 
@@ -195,7 +196,7 @@ def callNexusUrl(url, headers=headers, data=None, method='GET'):
     if args.verbosity >= 1:
         printErr("Response (HTTP %s):\n%s" % (str(code), response))
     if reason:
-        printErr("HTTP ERROR %s: %s\n%s" % (str(code), reason, url))
+        printErr("HTTP ERROR %s: %s\n%s\n%s" % (str(code), reason, url, response))
         sys.exit(1)
     return response
 
