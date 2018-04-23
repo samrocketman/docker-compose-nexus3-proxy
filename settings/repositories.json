@@ -3,7 +3,6 @@
       "maven2": {
           "proxy": {
               "repo-jenkins-ci-org": {
-                  "name": "Proxied repo.jenkins-ci.org",
                   "remote": {
                       "url": "https://repo.jenkins-ci.org/public/"
                   },
@@ -13,7 +12,6 @@
                   }
               },
               "maven-central": {
-                  "name": "Proxied maven central",
                   "remote": {
                       "url": "https://repo1.maven.org/maven2/"
                   },
@@ -24,14 +22,12 @@
           },
           "hosted": {
               "maven-releases": {
-                  "name": "Hosted maven releases",
                   "blobstore": {
                       "name": "maven-default"
                   },
                   "layout_policy": "strict"
               },
               "maven-snapshots": {
-                  "name": "Hosted maven snapshots",
                   "blobstore": {
                       "name": "maven-default"
                   },
