@@ -12,9 +12,25 @@ Different ways I provision locally include:
 - Docker Compose
 - Vagrant
 
-Example configurations:
+# Provisioning Nexus
 
-TODO
+Start and automatically configure Nexus.
+
+    docker-compose up -d
+
+The [`docker-compose.yml`](docker-compose.yml) can use docker health checking to
+delay configuring Nexus.  Repository settings can be found in
+[`./settings/repositories.json`](./settings/repositories.json).
+
+# Configure Nexus
+
+Delete default repositories and blob stores.
+
+    ./scripts/upload_function.py --delete -rf ./functions/deleteAllConfigurations.groovy
+
+Configure new repositories and blob stores.
+
+    ./scripts/upload_function.py --delete -rf ./functions/nexusConfiguration.groovy -d ./settings/repositories.json
 
 # License
 

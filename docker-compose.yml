@@ -10,6 +10,7 @@ volumes:
 services:
   nexus3:
     image: 'sonatype/nexus3'
+    init: true
     healthcheck:
       test: ['CMD', 'curl', '-fIu', 'admin:admin123', 'http://localhost:8081/service/metrics/ping']
       interval: 10s
@@ -23,3 +24,23 @@ services:
       - internal
     volumes:
       - 'nexus-data:/nexus-data'
+#  configure-nexus3:
+#    image: 'sonatype/nexus3'
+#    init: true
+#    entrypoint: ''
+#    command:
+#      - 'bash'
+#      - '-c'
+#      - |
+#        cd /opt/config
+#        ./scripts/upload_function.py --delete -rf ./functions/deleteAllConfigurations.groovy
+#        ./scripts/upload_function.py --delete -rf ./functions/nexusConfiguration.groovy -d ./settings/repositories.json
+#    networks:
+#      - internal
+#    volumes:
+#      - '.:/opt/config'
+#    environment:
+#      NEXUS_ENDPOINT: 'http://nexus3:8081'
+#    depends_on:
+#      nexus3:
+#        condition: service_healthy
