@@ -78,7 +78,7 @@ void validateConfiguration(def json) {
     List<String> supported_blobstores = ['file']
     List<String> supported_repository_providers = ['bower', 'docker', 'gitlfs', 'maven2', 'npm', 'nuget', 'pypi', 'raw', 'rubygems']
     List<String> supported_repository_types = ['proxy', 'hosted', 'group']
-    String valid_name = '^[-a-zA-Z]+$'
+    String valid_name = '^[a-zA-Z0-9][-_.a-zA-Z0-9]*$'
     if(!(json in Map)) {
         throw new MyException("Configuration is not valid.  It must be a JSON object.  Instead, found a JSON array.")
     }
