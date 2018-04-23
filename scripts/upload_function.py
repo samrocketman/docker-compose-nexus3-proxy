@@ -37,7 +37,7 @@ settings = {}
 parser = argparse.ArgumentParser(description="Upload Groovy script to Nexus 3 scripting endpoint.")
 parser.add_argument('-V', '--version', action='version', version="%(prog)s "+version)
 parser.add_argument('-c', '--ca-file', default=os.getenv('NEXUS_CA_FILE'), metavar='CERT_PEM', dest='pinned_cert', help='Path to pinned CA chain in PEM format.  Can be self signed to guarantee secure connection.  It can also be set via NEXUS_CA_FILE environment variable.')
-parser.add_argument('-f', '--function', action="append", default=[], metavar='groovy-script', dest='groovy_files', help='A groovy script to be uploaded as a Nexus function.  The file name (minus the extension) will be the of the REST function in Nexus.')
+parser.add_argument('-f', '--function', action="append", default=[], metavar='groovy-script', dest='groovy_files', help='A groovy script to be uploaded as a Nexus function.  The file name (minus the extension) will be the name of the REST function in Nexus.')
 parser.add_argument('-n', '--nexus', default=os.getenv('NEXUS_ENDPOINT', 'http://localhost:8081'), metavar='NEXUS_ENDPOINT', dest='nexus_endpoint', help='URL to the Nexus endpoint.')
 parser.add_argument('-p', '--proxy', default=os.getenv('NEXUS_SOCKS_PROXY'), metavar='proxy', dest='socks_proxy', help='Define a SOCKS5 proxy to proxy traffic.  It can also be set via NEXUS_SOCKS_PROXY environment variable.')
 parser.add_argument('-d', '--delete', action='store_true', dest='delete', help='Delete scripts instead of uploading them.')
