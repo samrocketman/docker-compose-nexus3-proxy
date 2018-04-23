@@ -61,8 +61,8 @@
                   "repositories": [
                       "maven-central",
                       "repo-jenkins-ci-org",
-                      "releases",
-                      "snapshots"
+                      "maven-releases",
+                      "maven-snapshots"
                   ],
                   "blobstore": {
                       "name": "maven-default",
