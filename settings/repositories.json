@@ -32,7 +32,7 @@
               }
           },
           "hosted": {
-              "releases": {
+              "maven-releases": {
                   "name": "Hosted maven releases",
                   "online": "true",
                   "blobstore": {
@@ -43,7 +43,7 @@
                   "layout_policy": "strict",
                   "write_policy": "allow_once"
               },
-              "snapshots": {
+              "maven-snapshots": {
                   "name": "Hosted maven snapshots",
                   "online": "true",
                   "blobstore": {
