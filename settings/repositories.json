@@ -10,7 +10,7 @@
                       "auth_type": "none"
                   },
                   "blobstore": {
-                      "name": "proxied-maven2-repo-jenkins-ci-org",
+                      "name": "maven-default",
                       "strict_content_type_validation": "true"
                   },
                   "version_policy": "release",
@@ -24,7 +24,7 @@
                       "auth_type": "none"
                   },
                   "blobstore": {
-                      "name": "proxied-maven2-maven-central",
+                      "name": "maven-default",
                       "strict_content_type_validation": "false"
                   },
                   "version_policy": "release",
@@ -36,7 +36,7 @@
                   "name": "Hosted maven releases",
                   "online": "true",
                   "blobstore": {
-                      "name": "hosted-maven2-releases",
+                      "name": "maven-default",
                       "strict_content_type_validation": "false"
                   },
                   "version_policy": "release",
@@ -47,41 +47,35 @@
                   "name": "Hosted maven snapshots",
                   "online": "true",
                   "blobstore": {
-                      "name": "hosted-maven2-snapshots",
+                      "name": "maven-default",
                       "strict_content_type_validation": "false"
                   },
                   "version_policy": "snapshot",
                   "layout_policy": "strict",
                   "write_policy": "allow_write"
               }
-          }
-      }
-  },
-  "repository-groups": {
-      "maven-public": {
-          "provider_type": "maven2",
-          "online": "true",
-          "repositories": [
-              "proxied-maven2-maven-central",
-              "proxied-maven2-repo-jenkins-ci-org",
-              "hosted-maven2-releases",
-              "hosted-maven2-snapshots"
-          ],
-          "blobstore": {
-              "name": "group-maven-public",
-              "strict_content_type_validation": "true"
+          },
+          "group": {
+              "maven-public": {
+                  "provider_type": "maven2",
+                  "online": "true",
+                  "repositories": [
+                      "proxied-maven2-maven-central",
+                      "proxied-maven2-repo-jenkins-ci-org",
+                      "hosted-maven2-releases",
+                      "hosted-maven2-snapshots"
+                  ],
+                  "blobstore": {
+                      "name": "group-maven-public",
+                      "strict_content_type_validation": "true"
+                  }
+              }
           }
       }
   },
   "blobstore": {
       "file": [
-          "default",
-          "hosted-maven2-snapshots",
-          "proxied-maven2-repo-jenkins-ci-org",
-          "proxied-maven2-maven-central",
-          "hosted-maven2-releases",
-          "hosted-maven2-snapshots",
-          "group-maven-public"
+          "maven-default"
       ]
   }
 }
