@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 /*
-    https://github.com/sonatype/nexus-public/blob/master/components/nexus-core/src/main/java/org/sonatype/nexus/internal/provisioning/BlobStoreApiImpl.groovy
-    blobStore methods
-    createFileBlobStore createS3BlobStore equals getBlobStoreManager getClass
-    getMetaClass getProperty hashCode invokeMethod notify notifyAll
-    setBlobStoreManager setMetaClass setProperty toString wait
+   This Nexus 3 REST function will configure Nexus repositories (hosted, proxy,
+   group) and blob stores.  This way Nexus can be quickly configured.
+ */
 
-    https://github.com/sonatype/nexus-public/blob/master/components/nexus-repository/src/main/java/org/sonatype/nexus/repository/internal/blobstore/BlobStoreManagerImpl.java
-    blobStoreManager methods
-    CGLIB$SET_STATIC_CALLBACKS CGLIB$SET_THREAD_CALLBACKS CGLIB$findMethodProxy
-    browse create delete equals exists get getClass getStateGuard hashCode
-    notify notifyAll on start stop toString wait
-*/
+import groovy.json.JsonSlurper
+import org.sonatype.nexus.repository.config.Configuration
+
+blobStoreManager = blobStore.blobStoreManager
+repositoryManager = repository.repositoryManager
 
 /**
   A custom exception class to limit unnecessary text in the JSON result of the
@@ -40,13 +37,6 @@ class MyException extends Exception {
         this.message
     }
 }
-
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
-import org.sonatype.nexus.repository.config.Configuration
-
-blobStoreManager = blobStore.blobStoreManager
-repositoryManager = repository.repositoryManager
 
 void checkForEmptyValidation(String message, List<String> bad_values) {
     if(bad_values) {
@@ -114,17 +104,14 @@ void createRepository(String provider, String type, String name, Map json) {
         storage.set('blobStoreName', json['blobstore']['name'])
         storage.set('strictContentTypeValidation', Boolean.parseBoolean(json['blobstore'].get('strict_content_type_validation', 'false')))
         if(type == 'hosted') {
-            //can be allow_write_once, allow_write, or read_only
-            storage.set('writePolicy', json.get('write_policy', 'allow_write_once'))
+            //can be ALLOW_ONCE (allow write once), ALLOW (allow write), or DENY (read only) ALLOW, DENY, ALLOW_ONCE
+            storage.set('writePolicy', json.get('write_policy', 'ALLOW_ONCE').toUpperCase())
         }
         else if(type == 'proxy') {
             def proxy = repo_config.attributes('proxy')
             proxy.set('remoteUrl', json['remote']['url'])
             String auth_type = json['remote'].get('auth_type', 'none')
             switch(auth_type) {
-                case 'none':
-                    repo_config.getAttributes().remove('httpclient')
-                    break
                 case ['username', 'ntml']:
                     def authentication = repo_config.attributes('httpclient').child('authentication')
                     authentication.set('type', auth_type);
@@ -133,19 +120,20 @@ void createRepository(String provider, String type, String name, Map json) {
                     authentication.set('ntlmHost', json['remote'].get('ntlm_host', ''))
                     authentication.set('ntlmDomain', json['remote'].get('ntlm_domain', ''))
                     break
-                default:
-                    repo_config.getAttributes().remove('httpclient')
-                    break
             }
-            if(provider == 'maven2') {
-                def maven = repo_config.attributes('maven')
-                maven.set('versionPolicy', json['remote'].get('version_policy', 'release').toUpperCase())
-                maven.set('layoutPolicy', json['remote'].get('layout_policy', 'permissive').toUpperCase())
-            }
-            repositoryManager.create(repo_config)
         }
+        if(provider == 'maven2') {
+            def maven = repo_config.attributes('maven')
+            maven.set('versionPolicy', json.get('version_policy', 'RELEASE').toUpperCase())
+            maven.set('layoutPolicy', json.get('layout_policy', 'PERMISSIVE').toUpperCase())
+        }
+        repositoryManager.create(repo_config)
     }
 }
+
+/*
+ * Main execution
+ */
 
 try {
     config = (new JsonSlurper()).parseText(args)

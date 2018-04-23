@@ -41,7 +41,7 @@
                   },
                   "version_policy": "release",
                   "layout_policy": "strict",
-                  "write_policy": "allow_write_once"
+                  "write_policy": "allow_once"
               },
               "snapshots": {
                   "name": "Hosted maven snapshots",
@@ -52,7 +52,7 @@
                   },
                   "version_policy": "snapshot",
                   "layout_policy": "strict",
-                  "write_policy": "allow_write"
+                  "write_policy": "allow"
               }
           },
           "group": {
