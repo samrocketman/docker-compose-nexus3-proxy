@@ -73,7 +73,7 @@
           }
       }
   },
-  "blobstore": {
+  "blobstores": {
       "file": [
           "maven-default"
       ]
