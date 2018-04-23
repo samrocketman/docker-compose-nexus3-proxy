@@ -13,9 +13,78 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/*
+    https://github.com/sonatype/nexus-public/blob/master/components/nexus-core/src/main/java/org/sonatype/nexus/internal/provisioning/BlobStoreApiImpl.groovy
+    blobStore methods
+    createFileBlobStore createS3BlobStore equals getBlobStoreManager getClass
+    getMetaClass getProperty hashCode invokeMethod notify notifyAll
+    setBlobStoreManager setMetaClass setProperty toString wait
+
+    https://github.com/sonatype/nexus-public/blob/master/components/nexus-repository/src/main/java/org/sonatype/nexus/repository/internal/blobstore/BlobStoreManagerImpl.java
+    blobStoreManager methods
+    CGLIB$SET_STATIC_CALLBACKS CGLIB$SET_THREAD_CALLBACKS CGLIB$findMethodProxy
+    browse create delete equals exists get getClass getStateGuard hashCode
+    notify notifyAll on start stop toString wait
+*/
+
+/**
+  A custom exception class to limit unnecessary text in the JSON result of the
+  Nexus REST API.
+ */
+class MyException extends Exception {
+    String message
+    MyException(String message) {
+        this.message = message
+    }
+    String toString() {
+        this.message
+    }
+}
+
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
-settings = (new JsonSlurper()).parseText(args)
+blobStoreManager = blobStore.blobStoreManager
+repositoryManager = repository.repositoryManager
 
-JsonOutput.toJson(settings.keySet())
+void checkForEmptyValidation(String message, List<String> bad_values) {
+    if(bad_values) {
+        throw new MyException("Found invalid ${message}: ${bad_values.join(', ')}")
+    }
+}
+
+void validateConfiguration(def json) {
+    List<String> supported_root_keys = ['repositories', 'blobstores']
+    List<String> supported_blobstores = ['file']
+    List<String> supported_repository_providers = ['bower', 'docker', 'gitlfs', 'maven2', 'npm', 'nuget', 'pypi', 'raw', 'rubygems']
+    List<String> supported_repository_types = ['proxied', 'hosted', 'group']
+    String valid_name = '^[-a-zA-Z]+$'
+    if(!(json in Map)) {
+        throw new MyException("Configuration is not valid.  It must be a JSON object.  Instead, found a JSON array.")
+    }
+    checkForEmptyValidation('root keys', ((json.keySet() as List) - supported_root_keys))
+    checkForEmptyValidation('blobstore types', ((json['blobstores']?.keySet() as List) - supported_blobstores))
+    if(!(json['blobstores']?.get('file') in List) || false in json['blobstores']?.get('file').collect { it in String }) {
+        throw new MyException('blobstore file type must contain a list of Strings.')
+    }
+    checkForEmptyValidation('repository providers', ((json['repositories']?.keySet() as List) - supported_repository_providers))
+    checkForEmptyValidation('repository types', (json['repositories'].collect { k, v -> v.keySet() as List }.flatten().sort().unique() - supported_repository_types))
+}
+
+try {
+    config = (new JsonSlurper()).parseText(args)
+}
+catch(Exception e) {
+    throw new MyException("Configuration is not valid.  It must be a valid JSON object.")
+}
+validateConfiguration(config)
+//we've come this far so it is probably good?
+
+//create blob stores first
+
+//create non-group repositories second
+
+//create repository groups last
+
+//.metaClass.methods*.name.sort().unique().join(' ')
+//'success'
