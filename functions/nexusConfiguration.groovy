@@ -108,7 +108,7 @@ void createRepository(String provider, String type, String name, Map json) {
         repo_config.recipeName = "${provider}-${type}".toString()
         storage.set('blobStoreName', json['blobstore']['name'])
     }
-    repo_config.online = Boolean.parseBoolean(json.get('online', 'false'))
+    repo_config.online = Boolean.parseBoolean(json.get('online', 'true'))
     storage.set('strictContentTypeValidation', Boolean.parseBoolean(json['blobstore'].get('strict_content_type_validation', 'false')))
     if(type == 'group') {
         def group = repo_config.attributes('group')

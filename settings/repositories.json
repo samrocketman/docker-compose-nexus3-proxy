@@ -4,51 +4,36 @@
           "proxy": {
               "repo-jenkins-ci-org": {
                   "name": "Proxied repo.jenkins-ci.org",
-                  "online": "true",
                   "remote": {
-                      "url": "https://repo.jenkins-ci.org/public/",
-                      "auth_type": "none"
+                      "url": "https://repo.jenkins-ci.org/public/"
                   },
                   "blobstore": {
                       "name": "maven-default",
                       "strict_content_type_validation": "true"
-                  },
-                  "version_policy": "release",
-                  "layout_policy": "permissive"
+                  }
               },
               "maven-central": {
                   "name": "Proxied maven central",
-                  "online": "true",
                   "remote": {
-                      "url": "https://repo1.maven.org/maven2/",
-                      "auth_type": "none"
+                      "url": "https://repo1.maven.org/maven2/"
                   },
                   "blobstore": {
-                      "name": "maven-default",
-                      "strict_content_type_validation": "false"
-                  },
-                  "version_policy": "release",
-                  "layout_policy": "permissive"
+                      "name": "maven-default"
+                  }
               }
           },
           "hosted": {
               "maven-releases": {
                   "name": "Hosted maven releases",
-                  "online": "true",
                   "blobstore": {
-                      "name": "maven-default",
-                      "strict_content_type_validation": "false"
+                      "name": "maven-default"
                   },
-                  "version_policy": "release",
-                  "layout_policy": "strict",
-                  "write_policy": "allow_once"
+                  "layout_policy": "strict"
               },
               "maven-snapshots": {
                   "name": "Hosted maven snapshots",
-                  "online": "true",
                   "blobstore": {
-                      "name": "maven-default",
-                      "strict_content_type_validation": "false"
+                      "name": "maven-default"
                   },
                   "version_policy": "snapshot",
                   "layout_policy": "strict",
@@ -57,7 +42,6 @@
           },
           "group": {
               "maven-public": {
-                  "online": "true",
                   "repositories": [
                       "maven-central",
                       "repo-jenkins-ci-org",
