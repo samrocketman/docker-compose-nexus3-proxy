@@ -66,7 +66,7 @@
                       "hosted-maven2-snapshots"
                   ],
                   "blobstore": {
-                      "name": "group-maven-public",
+                      "name": "maven-default",
                       "strict_content_type_validation": "true"
                   }
               }
