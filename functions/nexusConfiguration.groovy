@@ -95,44 +95,60 @@ void validateConfiguration(def json) {
 }
 
 void createRepository(String provider, String type, String name, Map json) {
+    Configuration repo_config
+    if(repositoryManager.get(name)) {
+        repo_config = repositoryManager.get(name).configuration
+    }
+    else {
+        repo_config = new Configuration()
+    }
+    def storage = repo_config.attributes('storage')
     if(!repositoryManager.get(name)) {
-        Configuration repo_config = new Configuration()
         repo_config.repositoryName = name
         repo_config.recipeName = "${provider}-${type}".toString()
-        repo_config.online = Boolean.parseBoolean(json.get('online', 'false'))
-        def storage = repo_config.attributes('storage')
         storage.set('blobStoreName', json['blobstore']['name'])
-        storage.set('strictContentTypeValidation', Boolean.parseBoolean(json['blobstore'].get('strict_content_type_validation', 'false')))
-        if(type == 'group') {
-            def group = repo_config.attributes('group')
-            group.set('memberNames', json.get('repositories', []))
+    }
+    repo_config.online = Boolean.parseBoolean(json.get('online', 'false'))
+    storage.set('strictContentTypeValidation', Boolean.parseBoolean(json['blobstore'].get('strict_content_type_validation', 'false')))
+    if(type == 'group') {
+        def group = repo_config.attributes('group')
+        group.set('memberNames', json.get('repositories', []))
+    }
+    else {
+        if(type == 'hosted') {
+            //can be ALLOW_ONCE (allow write once), ALLOW (allow write), or DENY (read only) ALLOW, DENY, ALLOW_ONCE
+            storage.set('writePolicy', json.get('write_policy', 'ALLOW_ONCE').toUpperCase())
         }
-        else {
-            if(type == 'hosted') {
-                //can be ALLOW_ONCE (allow write once), ALLOW (allow write), or DENY (read only) ALLOW, DENY, ALLOW_ONCE
-                storage.set('writePolicy', json.get('write_policy', 'ALLOW_ONCE').toUpperCase())
+        else if(type == 'proxy') {
+            def proxy = repo_config.attributes('proxy')
+            proxy.set('remoteUrl', json['remote']['url'])
+            String auth_type = json['remote'].get('auth_type', 'none')
+            switch(auth_type) {
+                case ['username', 'ntml']:
+                    def authentication = repo_config.attributes('httpclient').child('authentication')
+                    authentication.set('type', auth_type);
+                    authentication.set('username', json['remote'].get('user', ''))
+                    authentication.set('password', json['remote'].get('password', ''))
+                    authentication.set('ntlmHost', json['remote'].get('ntlm_host', ''))
+                    authentication.set('ntlmDomain', json['remote'].get('ntlm_domain', ''))
+                    break
+                default:
+                    repo_config.getAttributes().remove('httpclient')
+                    break
             }
-            else if(type == 'proxy') {
-                def proxy = repo_config.attributes('proxy')
-                proxy.set('remoteUrl', json['remote']['url'])
-                String auth_type = json['remote'].get('auth_type', 'none')
-                switch(auth_type) {
-                    case ['username', 'ntml']:
-                        def authentication = repo_config.attributes('httpclient').child('authentication')
-                        authentication.set('type', auth_type);
-                        authentication.set('username', json['remote'].get('user', ''))
-                        authentication.set('password', json['remote'].get('password', ''))
-                        authentication.set('ntlmHost', json['remote'].get('ntlm_host', ''))
-                        authentication.set('ntlmDomain', json['remote'].get('ntlm_domain', ''))
-                        break
-                }
-            }
-            if(provider == 'maven2') {
-                def maven = repo_config.attributes('maven')
+        }
+        if(provider == 'maven2') {
+            def maven = repo_config.attributes('maven')
+            if(!repositoryManager.get(name)) {
                 maven.set('versionPolicy', json.get('version_policy', 'RELEASE').toUpperCase())
-                maven.set('layoutPolicy', json.get('layout_policy', 'PERMISSIVE').toUpperCase())
             }
+            maven.set('layoutPolicy', json.get('layout_policy', 'PERMISSIVE').toUpperCase())
         }
+    }
+    if(repositoryManager.get(name)) {
+        repositoryManager.update(repo_config)
+    }
+    else {
         repositoryManager.create(repo_config)
     }
 }
