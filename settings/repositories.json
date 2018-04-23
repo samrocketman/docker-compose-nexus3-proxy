@@ -57,13 +57,12 @@
           },
           "group": {
               "maven-public": {
-                  "provider_type": "maven2",
                   "online": "true",
                   "repositories": [
-                      "proxied-maven2-maven-central",
-                      "proxied-maven2-repo-jenkins-ci-org",
-                      "hosted-maven2-releases",
-                      "hosted-maven2-snapshots"
+                      "maven-central",
+                      "repo-jenkins-ci-org",
+                      "releases",
+                      "snapshots"
                   ],
                   "blobstore": {
                       "name": "maven-default",
