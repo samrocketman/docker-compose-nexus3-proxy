@@ -27,3 +27,4 @@ shift
 curl "$@" -u "${NEXUS_USER}:${NEXUS_PASSWORD}" -X POST -d @"${FILE}" \
   --header 'Content-Type: text/plain' \
   "${NEXUS_ENDPOINT}"/service/rest/v1/script/nexusConfiguration/run
+echo
