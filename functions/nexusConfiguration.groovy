@@ -93,17 +93,18 @@ void validateConfiguration(def json) {
 
 void createRepository(String provider, String type, String name, Map json) {
     Configuration repo_config
-    if(repositoryManager.get(name)) {
+    Boolean exists = repositoryManager.get(name) as Boolean
+    if(exists) {
         repo_config = repositoryManager.get(name).configuration
     }
     else {
         repo_config = new Configuration()
     }
     def storage = repo_config.attributes('storage')
-    if(!repositoryManager.get(name)) {
+    if(!exists) {
         repo_config.repositoryName = name
         repo_config.recipeName = "${provider}-${type}".toString()
-        storage.set('blobStoreName', json['blobstore']['name'])
+        storage.set('blobStoreName', (json['blobstore']?.get('name', null))?: name)
     }
     repo_config.online = Boolean.parseBoolean(json.get('online', 'true'))
     storage.set('strictContentTypeValidation', Boolean.parseBoolean((json['blobstore']?.get('strict_content_type_validation', null))?: 'false'))
@@ -119,10 +120,13 @@ void createRepository(String provider, String type, String name, Map json) {
         else if(type == 'proxy') {
             def proxy = repo_config.attributes('proxy')
             proxy.set('remoteUrl', json['remote']['url'])
+            def httpclient = repo_config.attributes('httpclient')
+            httpclient.set('autoBlock', Boolean.parseBoolean(json['remote'].get('auto_block', 'true')))
+            httpclient.set('blocked', Boolean.parseBoolean(json['remote'].get('blocked', 'false')))
             String auth_type = json['remote'].get('auth_type', 'none')
             switch(auth_type) {
                 case ['username', 'ntml']:
-                    def authentication = repo_config.attributes('httpclient').child('authentication')
+                    def authentication = httpclient.child('authentication')
                     authentication.set('type', auth_type);
                     authentication.set('username', json['remote'].get('user', ''))
                     authentication.set('password', json['remote'].get('password', ''))
@@ -130,19 +134,18 @@ void createRepository(String provider, String type, String name, Map json) {
                     authentication.set('ntlmDomain', json['remote'].get('ntlm_domain', ''))
                     break
                 default:
-                    repo_config.getAttributes().remove('httpclient')
                     break
             }
         }
         if(provider == 'maven2') {
             def maven = repo_config.attributes('maven')
-            if(!repositoryManager.get(name)) {
+            if(!exists) {
                 maven.set('versionPolicy', json.get('version_policy', 'RELEASE').toUpperCase())
             }
             maven.set('layoutPolicy', json.get('layout_policy', 'PERMISSIVE').toUpperCase())
         }
     }
-    if(repositoryManager.get(name)) {
+    if(exists) {
         repositoryManager.update(repo_config)
     }
     else {
