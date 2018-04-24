@@ -1,60 +1,187 @@
 {
-  "repositories": {
-      "maven2": {
-          "proxy": {
-              "repo-jenkins-ci-org": {
-                  "remote": {
-                      "url": "https://repo.jenkins-ci.org/public/"
-                  },
-                  "blobstore": {
-                      "name": "maven-default",
-                      "strict_content_type_validation": "true"
-                  }
-              },
-              "maven-central": {
-                  "remote": {
-                      "url": "https://repo1.maven.org/maven2/"
-                  },
-                  "blobstore": {
-                      "name": "maven-default"
-                  }
-              }
-          },
-          "hosted": {
-              "maven-releases": {
-                  "blobstore": {
-                      "name": "maven-default"
-                  },
-                  "layout_policy": "strict"
-              },
-              "maven-snapshots": {
-                  "blobstore": {
-                      "name": "maven-default"
-                  },
-                  "version_policy": "snapshot",
-                  "layout_policy": "strict",
-                  "write_policy": "allow"
-              }
-          },
-          "group": {
-              "maven-public": {
-                  "repositories": [
-                      "maven-central",
-                      "repo-jenkins-ci-org",
-                      "maven-releases",
-                      "maven-snapshots"
-                  ],
-                  "blobstore": {
-                      "name": "maven-default",
-                      "strict_content_type_validation": "true"
-                  }
-              }
-          }
-      }
-  },
-  "blobstores": {
-      "file": [
-          "maven-default"
-      ]
-  }
+    "repositories": {
+        "maven2": {
+            "proxy": {
+                "proxied-maven-jenkinsci": {
+                    "remote": {
+                        "url": "https://repo.jenkins-ci.org/public/"
+                    }
+                },
+                "proxied-maven-central": {
+                    "remote": {
+                        "url": "https://repo1.maven.org/maven2/"
+                    }
+                },
+                "proxied-maven-jcenter": {
+                    "remote": {
+                        "url": "https://jcenter.bintray.com/"
+                    }
+                },
+                "proxied-plugins-gradle": {
+                    "remote": {
+                        "url": "https://plugins.gradle.org/m2/"
+                    }
+                }
+            },
+            "hosted": {
+                "hosted-maven-test": {
+                    "blobstore": {
+                        "strict_content_type_validation": "true"
+                    },
+                    "version_policy": "mixed",
+                    "layout_policy": "strict",
+                    "write_policy": "allow"
+                },
+                "maven-releases": {
+                    "layout_policy": "strict"
+                },
+                "maven-snapshots": {
+                    "version_policy": "snapshot",
+                    "layout_policy": "strict",
+                    "write_policy": "allow"
+                }
+            },
+            "group": {
+                "maven-public": {
+                    "repositories": [
+                        "proxied-maven-central",
+                        "proxied-maven-jcenter",
+                        "proxied-maven-jenkinsci",
+                        "maven-releases",
+                        "maven-snapshots",
+                        "proxied-plugins-gradle"
+                    ],
+                    "blobstore": {
+                        "strict_content_type_validation": "true"
+                    }
+                }
+            }
+        },
+        "npm": {
+            "proxy": {
+                "proxied-yarnpkg-com": {
+                    "remote": {
+                        "url": "https://registry.yarnpkg.com/"
+                    }
+                },
+                "proxied-npmjs-org": {
+                    "remote": {
+                        "url": "https://registry.npmjs.org"
+                    }
+                }
+            },
+            "hosted": {
+                "hosted-npm": {
+                    "blobstore": {
+                        "strict_content_type_validation": "true"
+                    }
+                }
+            },
+            "group": {
+                "npm-public": {
+                    "repositories": [
+                        "proxied-npmjs-org",
+                        "proxied-yarnpkg-com",
+                        "hosted-npm"
+                    ],
+                    "blobstore": {
+                        "strict_content_type_validation": "true"
+                    }
+                }
+            }
+        },
+        "pypi": {
+            "proxy": {
+                "proxied-pypi-python-org": {
+                    "remote": {
+                        "url": "https://pypi.python.org/"
+                    },
+                    "blobstore": {
+                        "strict_content_type_validation": "true"
+                    }
+                }
+            },
+            "hosted": {
+                "hosted-pypi": {
+                    "blobstore": {
+                        "strict_content_type_validation": "true"
+                    }
+                },
+                "hosted-pypi-test": {
+                    "blobstore": {
+                        "strict_content_type_validation": "true"
+                    },
+                    "write_policy": "allow"
+                }
+            },
+            "group": {
+                "pypi-public": {
+                    "repositories": [
+                        "proxied-pypi-python-org",
+                        "hosted-pypi"
+                    ],
+                    "blobstore": {
+                        "strict_content_type_validation": "true"
+                    }
+                }
+            }
+        },
+        "raw": {
+            "proxy": {
+                "proxied-nodejs-dist": {
+                    "remote": {
+                        "url": "https://nodejs.org/dist"
+                    },
+                    "blobstore": {
+                        "strict_content_type_validation": "true"
+                    }
+                },
+                "proxied-iojs-dist": {
+                    "remote": {
+                        "url": "https://iojs.org/dist"
+                    },
+                    "blobstore": {
+                        "strict_content_type_validation": "true"
+                    }
+                }
+            }
+        },
+        "docker": {
+            "hosted": {
+                "hosted-docker": {
+                    "docker": {
+                        "http_port": "8083",
+                        "force_basic_auth": "false"
+                    },
+                    "blobstore": {
+                        "strict_content_type_validation": "true"
+                    },
+                    "write_policy": "allow"
+                }
+            }
+        }
+    },
+    "blobstores": {
+        "file": [
+            "hosted-docker",
+            "hosted-maven-test",
+            "hosted-npm",
+            "hosted-pypi",
+            "hosted-pypi-test",
+            "maven-public",
+            "maven-releases",
+            "maven-snapshots",
+            "npm-public",
+            "proxied-iojs-dist",
+            "proxied-maven-central",
+            "proxied-maven-jcenter",
+            "proxied-maven-jenkinsci",
+            "proxied-nodejs-dist",
+            "proxied-npmjs-org",
+            "proxied-plugins-gradle",
+            "proxied-pypi-python-org",
+            "proxied-yarnpkg-com",
+            "pypi-public"
+        ]
+    }
 }
