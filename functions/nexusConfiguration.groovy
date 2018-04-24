@@ -48,10 +48,7 @@ List<String> getKnownDesiredBlobStores(Map json) {
     json['repositories'].collect { provider_key, provider ->
         provider.collect { repo_type_key, repo_type ->
             repo_type.collect { repo_name_key, repo_name ->
-                if(!repo_name['blobstore']?.get('name')) {
-                    throw new MyException("Blobstore configuration required: ${[provider_key, repo_type_key, repo_name_key].join(' -> ')}")
-                }
-                repo_name['blobstore']?.get('name')
+                (repo_name['blobstore']?.get('name', null))?: repo_name_key
             }
         }
     }.flatten().sort().unique()
@@ -109,7 +106,7 @@ void createRepository(String provider, String type, String name, Map json) {
         storage.set('blobStoreName', json['blobstore']['name'])
     }
     repo_config.online = Boolean.parseBoolean(json.get('online', 'true'))
-    storage.set('strictContentTypeValidation', Boolean.parseBoolean(json['blobstore'].get('strict_content_type_validation', 'false')))
+    storage.set('strictContentTypeValidation', Boolean.parseBoolean((json['blobstore']?.get('strict_content_type_validation', null))?: 'false'))
     if(type == 'group') {
         def group = repo_config.attributes('group')
         group.set('memberNames', json.get('repositories', []))
