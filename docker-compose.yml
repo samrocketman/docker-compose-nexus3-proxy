@@ -13,13 +13,18 @@ services:
     init: true
     healthcheck:
       test: ['CMD', 'curl', '-fIu', 'admin:admin123', 'http://localhost:8081/service/metrics/ping']
-      interval: 10s
-      timeout: 5s
+      interval: 45s
+      timeout: 30s
       retries: 6
+    restart: on-failure
     ports:
       - 8081:8081
+      - 8082:8082
+      - 8083:8083
     expose:
       - 8081/tcp
+      - 8082/tcp
+      - 8083/tcp
     networks:
       - internal
     volumes:
