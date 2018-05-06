@@ -3,15 +3,15 @@
  * Copy these settings to $HOME/.gradle/init.gradle
  */
 allprojects {
-	buildscript {
-		repositories {
-			mavenLocal()
-			maven { url 'http://localhost:8081/repository/maven-public/' }
-		}
-	}
-	repositories {
-		mavenLocal()
-		maven { url 'http://localhost:8081/repository/maven-public/' }
-	}
+    buildscript {
+        repositories {
+            mavenLocal()
+            maven { url 'http://localhost:8081/repository/maven-public/' }
+        }
+    }
+    repositories {
+        mavenLocal()
+        maven { url 'http://localhost:8081/repository/maven-public/' }
+    }
 }
 
