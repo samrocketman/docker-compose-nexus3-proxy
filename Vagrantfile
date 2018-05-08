@@ -79,8 +79,31 @@ EOF
       sha256sum -c - <<<'8a11713e11ed73abcb3feb88cd8b5674b3320ba33b22b2ba37915b4ecffdf042  /usr/local/sbin/docker-compose'
       chmod 755 /usr/local/sbin/docker-compose
     fi
-    if ! nc -v localhost 8081; then
-      ( cd /vagrant; docker-compose up -d )
+    if [ ! -f /etc/systemd/system/nexus3.service ]; then
+      cat > /etc/systemd/system/nexus3.service <<'EOF'
+# http://container-solutions.com/running-docker-containers-with-systemd/
+# install in /etc/systemd/system/nexus3.service
+[Unit]
+Description=Nexus Repository Manager 3
+After=docker.service
+Requires=docker.service
+
+[Service]
+WorkingDirectory=/vagrant
+TimeoutStartSec=0
+Restart=always
+EnvironmentFile=-/etc/sysconfig/docker.nexus3
+# execstartpre is not necessary when using docker-compose
+#ExecStartPre=/usr/local/sbin/docker-compose pull
+ExecStart=/usr/local/sbin/docker-compose run --service-ports nexus3
+ExecStop=/usr/local/sbin/docker-compose down
+
+[Install]
+WantedBy=multi-user.target
+EOF
+      systemctl daemon-reload
+      systemctl enable nexus3.service
+      systemctl start nexus3.service
     fi
   SHELL
 end
